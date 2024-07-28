@@ -88,10 +88,9 @@ class ImageMigrationThread(QThread):
     status_update = pyqtSignal(str)
     file_finished = pyqtSignal(str)
 
-    def __init__(self, json_files, firebase_config_file):
+    def __init__(self, json_files):
         QThread.__init__(self)
         self.json_files = json_files
-        self.firebase_config_file = firebase_config_file
         self.bucket = None
 
     def run(self):
@@ -151,12 +150,23 @@ class ImageMigrationThread(QThread):
             self.status_update.emit(f"An error occurred: {str(e)}")
 
     def setup_firebase(self):
-        cred = credentials.Certificate(self.firebase_config_file)
+        firebase_config = {
+            "type": "service_account",
+            "project_id": "gquiz-2",
+            "private_key_id": "7f8b0ecc956b8d2eea7c62aa3d5df2f33bbf363c",
+            "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCc9w+iNREyhQpN\nqpdY960xmfDscXJm/hC8ZioDnJXAQRC+08e+9eFpf1P/P58gXaRmcrmhUP5a+xhX\nB7MpvapbWIISWEwBEij4k1WgpLPoLgefup0tYOSgjg40zDzTT6fgr1zqhpSFMonN\nFNTw/wOwou+zCtWdoOBB1ValElDopXxzd9pOulnYNmWdauToz3qBdda5Gjbrtmi/\nHA7aoz8ztt8ZX+dPCtDiLMwppSeRlM/lEvqcWNFAtRcVxgTQD9rlVpGPY58gLZCm\nOBSwHC9pZNftXFRMjpCyrCzC2NB4rkgql+dZEO0Dob+mj4R06HLlNYEpOgpc0DUE\n+37kwfcTAgMBAAECggEABR63atUA2cjsQh2ROVnKJOs7v2qrjrypkAAG8HKsqOlk\n9ljnZVjDsizOE/nUHTqcXcIJKbRdFi0DI2ubJmdQ8Va/qCRCdDs3Urrzlf1pXCx0\n7NfkHMyMNyXz0CGezweQC3svy7WFAuFvaXRNI1HYW/fTLT0Y9ieWPW+AUcDWYG1g\nYiFBuue8jThFduD7n8Vc4ISG7E8bumfk6GplXAfUVm3cPNzm8NmGj6+BRDyCy/TO\nK3AKkzY9izyc7qiLWA4ywJoB8ftBEufW1QMrLIbFqf4L8Ri98iL3sIZR7GcqXyB8\n1T0bNu1xH35A72c1bweRmOhVewYHMLlDN7YWQWyxKQKBgQDNIONPjh0g0mR2KH75\nzLlDFtv7nZpgNI3vIFUbowAcxnRWxyMYtYL2fqAaGjQpB5tDvxUSsgbWfXtScchp\nhZVgBKqaOagAzLp1JrdaJconbJKKSQYEI1affXW3vnrzlIm880G9b2DK4vZti02t\n/TzhO47SToydJwj8VbTNvC0krQKBgQDD5GVVGCnNULV4zoULYrA6kOrPkL66AAvI\npyrDopN9YvhWEaFTS1zr2PnlAhwu5WIkchB6ICe2ziiqrRFHTf7GqXNdv0FX+p0s\nGKJ3RoOK8FjswVVkwFjDutARmbtickvDLHqcyPBCuByyl7JDHBHI+apcGvqAGHMh\nAmGTPvtCvwKBgBLgduqoSlft5J7XBTBZvabF4MKb80vtKi6aTBq5+lWrkaM2ui0Y\n7w9eAb/FL42jDI/Ect0Akw6EB6hDnkzPpTpr04NT0PkZ3gLP6EmcdqkAHdAp/iq9\nUchllEKvfcMSpUZFIISdTkv9bO4Rxrk/N64GfBMwdVI0+Ge4P2Y7bfAVAoGAVHVE\nu0uPulXx6AQimKYUFSwmERf3I3qhmgF5DqAptwXUzEcNpzv29Di4hWRDgnSju9Ly\nB7WVadu47N1xdazLDBxDAUhUg/opibmVUpe0X1MBBBLXHnlPzBPfYbdGc0uUHrIu\nqyp3bEy1EssUsJqJkH0UVmHLXy8rdC/yoemlq0ECgYEAn/g7eNaZ3BIU5PPqax7J\nryRb3EniwPEU6g5uRHgs/WB+z0XfrG5zuPad/BqH14UZ+xM6cim057HUaTsY0AIf\nA3mzuQbVjL51teFOVhJqp/A07IMxVC1d/MgI1tlL9UMxb7GzWeX8kfn7+yd9ez4T\nPuktNddUR/e0Uihju2sGrbM=\n-----END PRIVATE KEY-----\n",
+            "client_email": "firebase-adminsdk-7s2bo@gquiz-2.iam.gserviceaccount.com",
+            "client_id": "103601390977401602210",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-7s2bo%40gquiz-2.iam.gserviceaccount.com",
+            "universe_domain": "googleapis.com",
+        }
+        cred = credentials.Certificate(firebase_config)
         firebase_admin.initialize_app(
             cred,
-            {
-                "storageBucket": "gquiz-2.appspot.com"  # Replace with your actual bucket name
-            },
+            {"storageBucket": "gquiz-2.appspot.com"},
         )
         self.bucket = storage.bucket()
 
@@ -264,15 +274,6 @@ class App(QWidget):
         self.json_list = QListWidget()
         layout.addWidget(self.json_list)
 
-        # Firebase Config File Selection
-        firebase_layout = QHBoxLayout()
-        self.firebase_label = QLabel("Select Firebase Config File:")
-        self.firebase_button = QPushButton("Browse")
-        self.firebase_button.clicked.connect(self.selectFirebaseConfig)
-        firebase_layout.addWidget(self.firebase_label)
-        firebase_layout.addWidget(self.firebase_button)
-        layout.addLayout(firebase_layout)
-
         # Start Migration Button
         self.start_button = QPushButton("Start Migration")
         self.start_button.clicked.connect(self.startMigration)
@@ -303,21 +304,9 @@ class App(QWidget):
         for file in self.json_files:
             self.json_list.addItem(os.path.basename(file))
 
-    def selectFirebaseConfig(self):
-        filename, _ = QFileDialog.getOpenFileName(
-            self, "Select Firebase Config File", "", "JSON Files (*.json)"
-        )
-        if filename:
-            self.firebase_label.setText(
-                f"Firebase Config: {os.path.basename(filename)}"
-            )
-            self.firebase_config_file = filename
-
     def startMigration(self):
-        if self.json_files and hasattr(self, "firebase_config_file"):
-            self.migration_thread = ImageMigrationThread(
-                self.json_files, self.firebase_config_file
-            )
+        if self.json_files:
+            self.migration_thread = ImageMigrationThread(self.json_files)
             self.migration_thread.progress_update.connect(self.updateProgress)
             self.migration_thread.status_update.connect(self.updateStatus)
             self.migration_thread.file_finished.connect(self.fileFinished)
@@ -327,7 +316,7 @@ class App(QWidget):
             QMessageBox.warning(
                 self,
                 "Input Error",
-                "Please select JSON files and Firebase config file.",
+                "Please select JSON files.",
             )
 
     def updateProgress(self, value):
